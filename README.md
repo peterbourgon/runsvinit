@@ -1,23 +1,8 @@
-# reap
+# runsvinit
 
 If you have a Docker container that's a collection of runit-supervised daemons,
 this process is suitable for use as the ENTRYPOINT.
-
-```Docker
-FROM alpine:latest
-RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >>/etc/apk/repositories && apk add --update runit && rm -rf /var/cache/apk/*
-
-ADD foo /
-RUN mkdir -p /etc/service/foo
-ADD run-foo /etc/service/foo/run
-
-ADD bar /
-RUN mkdir -p /etc/service/bar
-ADD run-bar /etc/service/bar/run
-
-ADD reap /
-ENTRYPOINT ["/reap"]
-```
+See [the example](https://github.com/peterbourgon/runsvinit/tree/master/example).
 
 **Why not just exec runsvdir?**
 
