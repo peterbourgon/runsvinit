@@ -44,7 +44,7 @@ func main() {
 
 	log.Printf("%s started", runsvdir)
 
-	go gracefulShutdown(sv, supervisor.Process)
+	go shutdown(sv, supervisor.Process)
 
 	if err := supervisor.Wait(); err != nil {
 		log.Printf("%s exited with error: %v", runsvdir, err)
@@ -84,10 +84,11 @@ type signaler interface {
 	Signal(os.Signal) error
 }
 
-func gracefulShutdown(sv string, s signaler) {
+func shutdown(sv string, s signaler) {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
-	log.Printf("received %s", <-c)
+	sig := <-c
+	log.Printf("received %s", sig)
 
 	matches, err := filepath.Glob(filepath.Join(etcService, "*"))
 	if err != nil {
@@ -116,11 +117,11 @@ func gracefulShutdown(sv string, s signaler) {
 	}
 
 	log.Printf("stopped %d: %s", len(stopped), strings.Join(stopped, ", "))
-	log.Printf("stopping supervisor...")
-	if err := s.Signal(syscall.SIGTERM); err != nil {
+	log.Printf("stopping supervisor with signal %s...", sig)
+	if err := s.Signal(sig); err != nil {
 		log.Print(err)
 	}
-	log.Printf("graceful SIGTERM handler exiting")
+	log.Printf("shutdown handler exiting")
 }
 
 func cmd(path string, args ...string) *exec.Cmd {
