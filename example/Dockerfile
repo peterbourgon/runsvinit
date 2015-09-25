@@ -11,6 +11,5 @@ ADD bar /
 RUN mkdir -p /etc/service/bar
 ADD run-bar /etc/service/bar/run
 
-ADD https://github.com/peterbourgon/runsvinit/releases/download/v1.0.0/runsvinit-linux-amd64.tgz /
-RUN tar zxf /runsvinit-linux-amd64.tgz && mv /runsvinit-linux-amd64 /runsvinit
+ADD /runsvinit /
 ENTRYPOINT ["/runsvinit"]
