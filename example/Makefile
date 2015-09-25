@@ -2,10 +2,7 @@
 docker: runsvinit
 	docker build -t runsvinit-example .
 
-runsvinit: runsvinit-linux-amd64
-	mv $< $@
-
-runsvinit-linux-amd64: runsvinit-linux-amd64.tgz
+runsvinit: runsvinit-linux-amd64.tgz
 	tar zxf $<
 
 runsvinit-linux-amd64.tgz:
