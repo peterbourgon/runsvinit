@@ -33,7 +33,7 @@ wait
 ...except it doesn't [reap orphaned child processes](https://blog.phusion.nl/2015/01/20/docker-and-the-pid-1-zombie-reaping-problem/)
 and is therefore unsuitable for being PID 1.
 
-**Why not use my_init from phusion/baseimage-docker?**
+**Why not use my_init from [phusion/baseimage-docker](https://github.com/phusion/baseimage-docker)?**
 
 That works great — if you're willing to add python3 to your Docker images :)
 
