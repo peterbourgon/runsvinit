@@ -1,18 +1,18 @@
 #include <stdlib.h>
-#include <sys/types.h>
+#include <stdio.h>
 #include <unistd.h>
 
-int main ()
-{
-  pid_t child_pid;
-
-  child_pid = fork ();
-  if (child_pid > 0) {
-    sleep (60);
-  }
-  else {
-    exit (0);
-  }
-  return 0;
+int main() {
+        pid_t pid;
+        int i; 
+        for (i = 0; i<5; i++)  {  
+                pid = fork();
+                if (pid > 0) {
+                        printf("Zombie #%d born\n", i + 1);
+                } else {
+                        printf("Brains...\n");
+                        exit(0);
+                }  
+        }  
+        return 0; 
 }
-

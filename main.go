@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/exec"
@@ -13,6 +14,9 @@ import (
 const etcService = "/etc/service"
 
 func main() {
+	reap := flag.Bool("reap", true, "reap orphan children")
+	flag.Parse()
+
 	log.SetFlags(0)
 
 	runsvdir, err := exec.LookPath("runsvdir")
@@ -35,7 +39,12 @@ func main() {
 		log.Printf("warning: I'm not PID 1, I'm PID %d", pid)
 	}
 
-	go reapAll()
+	if *reap {
+		log.Print("reaping zombies")
+		go reapLoop()
+	} else {
+		log.Print("NOT reaping zombies")
+	}
 
 	supervisor := cmd(runsvdir, etcService)
 	if err := supervisor.Start(); err != nil {
@@ -53,31 +62,33 @@ func main() {
 	}
 }
 
-func reapAll() {
+// From https://github.com/ramr/go-reaper/blob/master/reaper.go
+func reapLoop() {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGCHLD)
 	for range c {
-		go reapOne()
+		reapChildren()
 	}
 }
 
-// From https://github.com/ramr/go-reaper/blob/master/reaper.go
-func reapOne() {
-	var (
-		ws  syscall.WaitStatus
-		pid int
-		err error
-	)
+func reapChildren() {
 	for {
-		pid, err = syscall.Wait4(-1, &ws, 0, nil)
-		if err != syscall.EINTR {
-			break
+		var (
+			ws  syscall.WaitStatus
+			pid int
+			err error
+		)
+		for {
+			pid, err = syscall.Wait4(-1, &ws, 0, nil)
+			if err != syscall.EINTR {
+				break
+			}
 		}
+		if err == syscall.ECHILD {
+			return // done
+		}
+		log.Printf("reaped child process %d (%+v)", pid, ws)
 	}
-	if err == syscall.ECHILD {
-		return
-	}
-	log.Printf("reaped child process %d (%+v)", pid, ws)
 }
 
 type signaler interface {
