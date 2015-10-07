@@ -5,4 +5,4 @@ machine:
 test:
   override:
     - go test -v
-    - make CIRCLECI=true SUDO=sudo RM= -C zombietest
+    - make CIRCLECI=true SUDO=sudo RMCONTAINER= -C zombietest
