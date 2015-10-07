@@ -11,14 +11,15 @@ function zombies() {
 }
 
 function stop_rm() {
-	docker stop $1
-	docker rm $1
+	docker stop $1 >/dev/null
+	#docker logs $1
+	docker rm $1 >/dev/null
 }
 
 SLEEP=1
 RC=0
 
-C=$(docker run -d zombietest /runsvinit -reap=false)
+C=$(docker run -d zombietest /runsvinit -reap=false -debug)
 sleep $SLEEP
 NOREAP=$(zombies)
 echo -n without reaping, we have $NOREAP zombies...
@@ -31,7 +32,7 @@ else
 fi
 stop_rm $C
 
-C=$(docker run -d zombietest /runsvinit)
+C=$(docker run -d zombietest /runsvinit -debug)
 sleep $SLEEP
 YESREAP=$(zombies)
 echo -n with reaping, we have $YESREAP zombies...

@@ -1,6 +1,6 @@
-GO?=go
-SUDO?=
-RM?=--rm
+GO ?= go
+SUDO ?=
+RMCONTAINER ?= --rm
 
 .PHONY: test clean
 
@@ -15,7 +15,7 @@ runsvinit: ../*.go
 	env GOOS=linux GOARCH=amd64 $(GO) build -o $@ github.com/peterbourgon/runsvinit
 
 zombie: .build.uptodate
-	$(SUDO) docker run $(RM) -v $(shell pwd):/mount zombietest-build cc -Wall -Werror -o /mount/zombie /zombie.c
+	$(SUDO) docker run $(RMCONTAINER) -v $(shell pwd):/mount zombietest-build cc -Wall -Werror -o /mount/zombie /zombie.c
 
 .build.uptodate: build/zombie.c build/Dockerfile
 	$(SUDO) docker build -t zombietest-build build/

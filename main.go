@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 )
 
@@ -121,7 +122,7 @@ func shutdown(sv string, s signaler) {
 		return
 	}
 
-	var stopped []string
+	var wg sync.WaitGroup
 	for _, match := range matches {
 		fi, err := os.Stat(match)
 		if err != nil {
@@ -134,14 +135,19 @@ func shutdown(sv string, s signaler) {
 		}
 		service := filepath.Base(match)
 		stop := cmd(sv, "stop", service)
-		if err := stop.Run(); err != nil {
-			infof("%s: %v", strings.Join(stop.Args, " "), err)
-			continue
-		}
-		stopped = append(stopped, service)
+		debugf("stopping %s...", service)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := stop.Run(); err != nil {
+				infof("%s: %v", strings.Join(stop.Args, " "), err)
+			} else {
+				debugf("stopped %s", service)
+			}
+		}()
 	}
+	wg.Wait()
 
-	debugf("stopped %d: %s", len(stopped), strings.Join(stopped, ", "))
 	debugf("stopping supervisor with signal %s...", sig)
 	if err := s.Signal(sig); err != nil {
 		info(err)
